@@ -117,7 +117,7 @@ export default function PreOrder() {
         total_amount: calculateTotal(getOrderItemsList()),
       };
 
-      const { error } = await supabase.from('orders').insert([newOrder]);
+      const { error } = await supabase.from('bakery-orders').insert([newOrder]);
 
       if (error) {
         console.error('Supabase 存檔失敗：', error);

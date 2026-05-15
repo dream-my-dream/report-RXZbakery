@@ -6,10 +6,26 @@ import { ProductCard } from '@/components/ProductCard';
 import { PRODUCTS } from '@/data/products';
 import { ROUTE_PATHS } from '@/lib/index';
 import { IMAGES } from '@/assets/images';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const featuredProducts = PRODUCTS.slice(0, 3);
+  const [announcements, setAnnouncements] = useState<{id: number, content: string}[]>([]);
+  const [showPoster, setShowPoster] = useState(true);
+
+    useEffect(() => {
+      const fetchAnnouncements = async () => {
+        const { supabase } = await import('@/lib/supabase');
+        const { data } = await supabase
+          .from('announcements')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+        setAnnouncements(data || []);
+      };
+      fetchAnnouncements();
+    }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -55,7 +71,25 @@ export default function Home() {
 
   return (
     <Layout>
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      {showPoster && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="relative max-w-md w-full">
+            <button
+              onClick={() => setShowPoster(false)}
+              className="absolute -top-4 -right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 shadow-lg text-lg font-bold z-10"
+            >
+              ✕
+            </button>
+            <img
+              src="/report-RXZbakery/images/postGemini.png"
+              alt="活動海報"
+              className="w-full rounded-2xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
+      
+      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src={IMAGES.BAKERY_HERO_20260508_013154_41}
@@ -100,6 +134,16 @@ export default function Home() {
               <Link to={ROUTE_PATHS.PREORDER}>立即預購</Link>
             </Button>
           </div>
+
+          {announcements.length > 0 && (
+            <div className="mt-6 flex flex-col gap-2">
+              {announcements.map((a) => (
+                <p key={a.id} className="text-base text-center text-primary font-medium">
+                  🎉 {a.content}
+                </p>
+              ))}
+            </div>
+          )}
         </motion.div>
       </section>
 
@@ -128,12 +172,15 @@ export default function Home() {
               </p>
             </div>
             <div className="order-1 md:order-2">
-              <img
-                src={IMAGES.BAKERY_INTERIOR_2}
-                alt="RXZ Bakery Interior"
-                className="w-full h-[400px] object-cover rounded-3xl shadow-2xl"
+            <div className="w-full h-[400px] rounded-3xl shadow-2xl overflow-hidden">
+              <iframe
+                src="https://www.youtube.com/embed/64LJ5cgcnMg"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
               />
             </div>
+          </div>
           </motion.div>
         </div>
       </section>

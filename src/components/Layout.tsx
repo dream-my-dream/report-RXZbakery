@@ -30,21 +30,33 @@ export function Layout({ children }: LayoutProps) {
               <span className="text-lg text-primary/60">♡ 🐾</span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors hover:text-primary ${
-                      isActive ? 'text-primary' : 'text-foreground/80'
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors hover:text-primary ${
+                    isActive ? 'text-primary' : 'text-foreground/80'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+            {/* LINE 加入好友按鈕 */}
+            <a
+              href="https://line.me/ti/p/@001naagg"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png"
+                alt="加入LINE好友"
+                className="h-8"
+              />
+            </a>
+          </nav>
 
             <Button
               variant="ghost"
@@ -81,6 +93,18 @@ export function Layout({ children }: LayoutProps) {
                     {link.label}
                   </NavLink>
                 ))}
+                <a
+                  href="https://line.me/ti/p/@001naagg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <img
+                    src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png"
+                    alt="加入LINE好友"
+                    className="h-8"
+                  />
+                </a>
               </nav>
             </motion.div>
           )}

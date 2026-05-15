@@ -32,15 +32,15 @@ type OrderItem = {
 
 type Order = {
   order_id: string;
-  createdAt: string;
+  created_at: string;
   status?: 'unconfirmed' | 'pending' | 'collected' | 'completed';
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string;
-  pickupDate: string;
-  pickupTime: string;
-  specialNotes?: string;
-  totalAmount: number;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  pickup_date: string;
+  pickup_time: string;
+  special_notes?: string;
+  total_amount: number;
   items: OrderItem[];
 };
 
@@ -51,19 +51,28 @@ export default function AdminPage() {
 
   // 頁面一載入，就去 localStorage 拿資料
   useEffect(() => {
-    const saved = localStorage.getItem('breadOrders');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // 最新的訂單排在最上面
-      setOrders(parsed.reverse());
+  const fetchOrders = async () => {
+    const { supabase } = await import('@/lib/supabase');
+    const { data, error } = await supabase
+      .from('bakery-orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('讀取訂單失敗：', error);
+    } else {
+      setOrders(data || []);
     }
+  };
+
+    fetchOrders();
   }, []);
 
   // 刪除單筆訂單
   const deleteOrder = async (order_id: string) => {
     const { supabase } = await import('@/lib/supabase');
     const { error } = await supabase
-      .from('orders')
+      .from('bakery-orders')
       .delete()
       .eq('order_id', order_id);
 
@@ -90,7 +99,7 @@ export default function AdminPage() {
     const target = updated.find((o) => o.order_id === order_id);
     if (target) {
       await supabase
-        .from('orders')
+        .from('bakery-orders')
         .update({ status: target.status })
         .eq('order_id', order_id);
     }
@@ -100,7 +109,7 @@ export default function AdminPage() {
 
     // 同時套用日期和狀態篩選
     const filteredOrders = orders.filter((o) => {
-        const matchDate = filterDate ? o.pickupDate === filterDate : true;
+        const matchDate = filterDate ? o.pickup_date === filterDate : true;
         const matchStatus = filterStatus ? (o.status || 'unconfirmed') === filterStatus : true;
         return matchDate && matchStatus;
     });
@@ -160,7 +169,7 @@ export default function AdminPage() {
         {/* 訂單標題列 */}
         <div className="flex justify-between items-center mb-4">
         <div>
-            <p className="text-xs text-gray-400">{order.createdAt}</p>
+            <p className="text-xs text-gray-400">{order.created_at}</p>
             <p className="font-mono text-sm text-gray-500">{order.order_id}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -196,15 +205,15 @@ export default function AdminPage() {
               <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                 <div className="bg-gray-50 rounded-xl p-4">
                   <p className="font-semibold mb-2">👤 顧客資訊</p>
-                  <p>姓名：{order.customerName}</p>
-                  <p>電話：{order.customerPhone}</p>
-                  <p>信箱：{order.customerEmail}</p>
+                  <p>顧客姓名：{order.customer_name}</p>
+                  <p>手機號碼：{order.customer_phone}</p>
+                  <p>電子信箱(需要訂單明細者請填寫)：{order.customer_email}</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4">
                   <p className="font-semibold mb-2">🗓️ 取貨資訊</p>
-                  <p>日期：{order.pickupDate}</p>
-                  <p>時段：{order.pickupTime}</p>
-                  {order.specialNotes && <p>備註：{order.specialNotes}</p>}
+                  <p>取貨日期：{order.pickup_date}</p>
+                  <p>預計來店時段：{order.pickup_time}</p>
+                  {order.special_notes && <p>特殊備註：{order.special_notes}</p>}
                 </div>
               </div>
 
@@ -230,7 +239,7 @@ export default function AdminPage() {
                   </tbody>
                 </table>
                 <p className="text-right font-bold mt-2">
-                  總計：{formatPrice(order.totalAmount)}
+                  品項總計：{formatPrice(order.total_amount)}
                 </p>
               </div>
 
